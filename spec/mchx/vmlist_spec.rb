@@ -1,11 +1,12 @@
 require 'spec_helper'
 
-describe Mchx::Vmlist do
+describe Vmlist do
   it 'has a version number' do
-    expect(Mchx::Vmlist::VERSION).not_to be nil
+    expect(Vmlist::VERSION).not_to be nil
   end
 
   it 'does something useful' do
-    expect(false).to eq(true)
+    s = Vmlist::Chef.new
+    expect(s.something).to eq('some string')
   end
 end

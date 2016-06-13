@@ -1,7 +1,10 @@
-require "mchx/vmlist/version"
+require_relative "vmlist/version"
+require_relative 'vmlist/chef'
 
-module Mchx
-  module Vmlist
-    # Your code goes here...
-  end
+
+module Vmlist
+
+  server = Vmlist::Chef.new
+
+  puts server.something
 end

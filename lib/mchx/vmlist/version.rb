@@ -1,5 +1,5 @@
-module Mchx
-  module Vmlist
-    VERSION = "0.1.0"
-  end
+
+module Vmlist
+  VERSION = "0.1.0"
 end
+

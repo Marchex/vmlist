@@ -1,0 +1,208 @@
+<html>
+<head>
+  <title>KVM Stats</title>
+  <style type="text/css">
+    ul{ list-style-type:none; margin:0; padding:0;}
+    li{ display:inline; }
+    th{ font-size:12px;}
+    td{ font-size:12px;}
+    b{ font-size:12px;}
+  </style>
+</head>
+<body>
+<!-- Page Header: -->
+<!-- Datestamp -->
+<b>Colors Applied:</b> <%= Time.now.strftime("%Y-%m-%d %H:%M:%S %Z") %>
+<span style="margin-left:5em;"><b>Pages:</b>&nbsp; <a href="som1_RAM.html">SOM1 Sorted by RAM Allocation</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="som1.html">SOM1 Sorted by CPU+RAM Allocation</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="index.html">ALL DC Hosts Sorted Alphabetically</a></span>
+<!-- Legend for DC colors
+<table cellpadding=0px border=0 align=center>
+<tr>
+  <th face='helvetica' size='6'>DC:</th>
+  <td bgcolor=#DEBABA>SAD Seattle, WA</td>
+  <td bgcolor=#75EFA5>Sommerset, NJ</td>
+  <td bgcolor=#3374AA>Philidelphia, PA</td>
+  <td bgcolor=#666633>QA Unknown</td>
+  <td bgcolor=#777777>Other</td>
+</tr>
+-->
+</table>
+<!-- Allocation Color Legend
+<table cellpadding=0px border=0 align=center>
+  <tr>
+    <th face='helvetica' size='6'>Allocation:</th>
+    <td bgcolor=#00BF44>&lt;30%</td>
+    <td bgcolor=#99cc00>&gt;30%</td>
+    <td bgcolor=#ffff00>&gt;50%</td>
+    <td bgcolor=#ff6600>&gt;70%</td>
+    <td bgcolor=#ff3366>&gt;80%</td>
+    <td bgcolor=#FF1144>&gt;99%</td>
+    <td bgcolor=#8E4444>&gt;150%</td>
+  </tr>
+</table>
+-->
+<!-- <td bgcolor=#8E4444>&gt;150% <b>cores</b></td> -->
+<!-- <td bgcolor=#8E4444>&gt;150% <b>RAM</b></td> -->
+
+<h2 align="center"> Click KVM Host Name for VM list</h2>
+<!-- End Page Header -->
+<!-- Table of Resources by KVM -->
+<table align="center" border="1">
+  <thead>
+  <tr>
+    <th>Host name</th>
+    <th>OS</th>
+    <th>Use</th>
+    <th>Core Allocation</th>
+    <th>Memory Allocation</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @hosts.sort{|a,b| a[0].split(pattern='.').reverse.join(sep='.') <=> b[0].split(pattern='.').reverse.join(sep='.')}.each do |k,v| %>
+      <tr> <td align="center"><a name='<%= k %>-top'><a href='#<%= k %>'><%= k %></a></a></td>
+        <!--
+          <%=
+        dc=/sad|som|phl/i.match(k).to_s
+        color = case dc
+                  when "sad" then "DEBABA"
+                  when "som" then "75EFA5"
+                  when "phl" then "3374AA"
+                  else "666633"
+                end
+        "<td bgcolor=#" + color + ">" + dc
+      %>
+	  </td>
+          -->
+        <%=
+          if ( v['os'][0] == "centos" && v['os'][1] == "6.6" )
+            os_color = "50FF50"
+          elsif ( v['os'][0] == "centos" && v['os'][1] == "6.5" )
+            os_color = "FFFF40"
+          elsif ( v['os'][0] == "centos" && v['os'][1] == "6.4" )
+            os_color = "FFEE40"
+          elsif ( v['os'][0] == "centos" && v['os'][1] == "7.1.1503" )
+            os_color = "00FF00"
+          else
+            os_color = "FF4040"
+          end
+          "<td align=center bgcolor=" + os_color + ">" + v['os'][0] + " " + v['os'][1]
+        %>
+        </td>
+        <%=
+          use_color = case v['use']
+                        when "broken" then "FF4040"
+                        when "corp" then "D2B48C"
+                        when "ghetto" then "COCO60"
+                        when "infrastructure" then "FF8020"
+                        when "lab" then "8080FF"
+                        when "production" then "40FF40"
+                        when "preprod" then "FFFFFF"
+                        when "special" then "FFFF40"
+                        when "database" then "CCAA10"
+                        else "C0C0C0"
+                      end
+          "<td align=center bgcolor=" + use_color + ">" + v['use']
+        %>
+        </td>
+        <%
+          cpuuse = v['cpu'][1]
+          cpumax = v['cpu'][0]
+          cpupct = (cpuuse).percent_of(cpumax).round(2)
+          if cpupct < 100
+            cpushade = "%02x" % ((100 - (cpupct))*2.55)
+            cpucolor = cpushade + "FF" + cpushade
+          elsif cpupct < 130
+            cpucolor = "00FF00"
+          elsif cpupct < 258
+            cpuover = cpupct - 130
+            cpured = "%02x" % (2 * cpuover)
+            cpugreen = "%02x" % (255 - (2 * cpuover))
+            cpublue = "%02x" % ((0.5 * cpuover).round)
+            cpucolor = cpured + cpugreen + cpublue
+          else
+            cpucolor = "FF0000"
+          end
+        %>
+        <td align="center" bgcolor=#<%= cpucolor %>>
+          <%= cpupct %>%
+          (<%= cpuuse %> Used / <%= cpumax %> Total)
+
+        </td>
+        <%
+          memuse = v['memory'][1]
+          memmax = v['memory'][0]
+          mempct = (memuse).percent_of(memmax).round(2)
+          if mempct < 100
+            memshade = "%02x" % ((100 - (mempct))*2.55)
+            memcolor = memshade + "FF" + memshade
+          elsif mempct < 228
+            memover = mempct - 100
+            memred = "%02x" % (2 * memover)
+            memgreen = "%02x" % (255 - (2 * memover))
+            memblue = "%02x" % ((0.5 * memover).round)
+            memcolor = memred + memgreen + memblue
+          else
+            memcolor = "FF0000"
+          end
+        %>
+        <td align="center" bgcolor=#<%= memcolor %>>
+          <%= mempct %>%
+          (<%= memuse %>GB Used / <%= memmax %>GB Total)
+        </td> </tr>
+  <% end %>
+  </tbody>
+</table>
+<!-- End of Resorces by KVM table -->
+<!-- Iterate Guests Lists by KVM Host -->
+<% @guests.sort.each do |k,v| %>
+    <table border="1">
+      <thead>
+      <a name=<%= k %>>
+        <tr><th>KVM Host</th><th>DC</th><th>Location</th><th>VMs</th>
+      </a></tr>
+      </thead>
+      <tbody>
+      <tr><th><a href='#<%= k %>-top'><%= k %></a></th>
+        <!-- <td><% dc=/sad|som|phl/i.match(k).to_s %><%= dc %></td> -->
+        <%=
+          dc=/sad|som|phl/i.match(k).to_s
+          color = case dc
+                    when "sad" then "DEBABA"
+                    when "som" then "75EFA5"
+                    when "phl" then "3374AA"
+                    else "666633"
+                  end
+          city = case dc
+                   when "sad" then "Seatte, WA"
+                   when "som" then "Somerset, NJ"
+                   when "phl" then "Philadelphia, PA"
+                   else "Other City"
+                 end
+          "<td bgcolor=#" + color + ">" + dc
+        %>
+        </td>
+        <td><%= city %></td>
+        <td><b><%= v.length %></b></td>
+      </tr>
+      </tbody>
+    </table>
+    <table border="1">
+      <tr><th>#</th><th>VM name</th><th>State</th><th>CPUs</th><th>RAM</th></tr>
+      <% x = 0 %>
+      <% v.keys.each do |y| %>
+          <% x += 1 %>
+          <tr><td><%= x %>.</td><td> <%= y %></td><td> <%= v[y]['state'] %></td><td> <%= v[y]['CPU(s)'] %></td><td> <%= v[y]['Max memory'] %></td></tr>
+      <% end %>
+      <!-- <tr><td>VMs:</td><td> <%= x %></td></tr> -->
+    </table>
+<% end %>
+<!-- End of Iteration of Guests by KVM Host -->
+<table border=1>
+  <thead><H2>Infra owned hosts</H2></thead>
+  <tbody>
+  <% @infrahosts.keys.sort.each do |k| %>
+      <tr><td><%= k %></tr></td>
+  <% end %>
+  </tbody>
+</table>
+</body>
+</html>

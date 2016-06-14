@@ -1,10 +1,14 @@
 require_relative "vmlist/version"
-require_relative 'vmlist/chef'
+require_relative 'vmlist/server_mgr'
 
 
 module Vmlist
 
-  server = Vmlist::Chef.new
+  svrs = Vmlist::ServerMgr.new
+  svrs.load_config
+  svrs.init_servers
+  svrs.poll_servers
+  foo = svrs.get_servers_list
 
-  puts server.something
+  foo
 end

@@ -1,14 +1,19 @@
 #!/usr/bin/env ruby
 
 require "bundler/setup"
-require "mchx/vmlist"
+require "../lib/mchx/vmlist/server"
 
-# You can add fixtures and/or initialization code here to make experimenting
-# with your gem easier. You can also use a different console, if you like.
 
-# (If you use this, don't forget to add pry to your Gemfile!)
-# require "pry"
-# Pry.start
-
-require "irb"
-IRB.start
+obj = VmList::Server.new({'endpoint' =>  'https://api.opscode.com/organizations/marchex',
+                         'client' => 'jciimarchex',
+                         'key' => '/Users/jcarter/.chef/jciimarchex.pem'})
+obj.get_config
+obj.connect
+obj.load_clients
+obj.get_clients
+obj.load_kvmhosts
+obj.get_kvmhosts
+obj.load_kvmguests
+obj.get_kvmguests
+obj.load_infrahosts
+obj.get_infrahosts

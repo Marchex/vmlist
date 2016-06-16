@@ -33,9 +33,8 @@ module VmList
       @clients = @cnxn.clients.list
     end
 
-    # nodes = Spice.nodes(:q => "virtualization_system:kvm AND virtualization_role:host")
-    def load_kvmhosts
-      @kvmhosts = @cnxn.partial_search.query(:node,
+    def _load_kvmhosts
+      temp = @cnxn.partial_search.query(:node,
                        {
                            name:               [ 'name'],
                            cpu_total:          [ 'cpu', 'total' ],
@@ -49,24 +48,45 @@ module VmList
                        },
                        'virtualization_system:kvm AND virtualization_role:host',
                        start: 1)
+      result = {}
+      temp.rows.each do |x|
+        result.store(x['name'], x)
+      end
+      result
+    end
 
-      puts @kvmhosts
+    def load_kvmhosts
+      @kvmhosts = _load_kvmhosts
     end
 
     def load_kvmguests
-      @kvmguests = Hash[[ *@kvmhosts.rows.map {|x| [ x['name'], x['guests'] ] }]]
+      load_kvmhosts if @kvmhosts.nil? || @kvmhosts.empty?
+      @kvmguests = {}
+      @kvmhosts.each do |k,v|
+        @kvmguests.store(k,  v['guests'])
+      end
+      @kvmguests
     end
 
     def load_infrahosts
-      @infrahosts = @cnxn.partial_search.query(:node, {fqdn: ['name'] }, 'roles:infra', start: 1)
+      temp = @cnxn.partial_search.query(:node, {fqdn: ['name'] }, 'roles:infra', start: 1)
+      @infrahosts = temp.rows
     end
 
     def get_clients
       @clients
     end
 
+    def set_clients(clients)
+      @clients = clients
+    end
+
     def get_kvmhosts
       @kvmhosts
+    end
+
+    def set_kvmhosts(hosts)
+      @kvmhosts = hosts
     end
 
     def get_kvmguests
@@ -75,6 +95,30 @@ module VmList
 
     def get_infrahosts
       @infrahosts
+    end
+
+    def set_infrahosts(hosts)
+      @infrahosts = hosts
+    end
+
+    def massage_cpu_data
+      @kvmguests.each do |k,v|
+        v.each do |y,z|
+          if z['state'] == "shut" then
+            shutcpu = z['CPU(s)'].to_i
+            shutmem = z['Max memory'].to_i / 1048576
+
+            @kvmhosts[k]['cpu'][1] = @kvmhosts[k]['cpu'][1] - shutcpu unless @kvmhosts[k]['cpu'][1] == 0
+            @kvmhosts[k]['memory'][1] = @kvmhosts[k]['memory'][1] - shutmem unless @kvmhosts[k]['memory'] == 0
+          end
+        end
+      end
+    end
+
+    def remove_base_guests
+      @kvmguests.values.each do |guest|
+        guest.delete_if {|k| k =~ /base|template/}
+      end
     end
 
   end

@@ -21,8 +21,8 @@ obj.connect
 obj.load_clients
 writeout prefix + "test_clients.dumped", Marshal.dump(obj.get_clients)
 
-obj.load_kvmhosts
-writeout prefix + 'test_kvmhosts.dumped', Marshal.dump(obj.get_kvmhosts)
+
+writeout prefix + 'test_kvmhosts.dumped', Marshal.dump(obj._load_kvm_data)
 
 #obj.load_kvmguests
 #obj.get_kvmguests

@@ -1,5 +1,5 @@
 require 'chef-api'
-
+require_relative 'host'
 module VmList
   class Server
     @conf = {}
@@ -30,47 +30,63 @@ module VmList
     end
 
     def load_clients
-      @clients = @cnxn.clients.list
+      @clients = _load_clients
     end
 
-    def _load_kvmhosts
+    def _load_clients
+      @cnxn.clients.list
+    end
+
+    def _load_kvm_data
       temp = @cnxn.partial_search.query(:node,
-                       {
-                           name:               [ 'name'],
-                           cpu_total:          [ 'cpu', 'total' ],
-                           guest_cpu_total:    [ 'virtualization', 'kvm', 'guest_cpu_total'],
-                           memory:             [ 'memory', 'total' ],
-                           guest_maxmem_total: [ 'virtualization', 'kvm', 'guest_maxmemory_total'],
-                           platform:           [ 'platform' ],
-                           platform_version:   [ 'platform_version' ],
-                           guests:             [ 'virtualization', 'kvm', 'guests' ],
-                           use:                [ 'system_attrs', 'host_use' ]
-                       },
-                       'virtualization_system:kvm AND virtualization_role:host',
-                       start: 1)
-      result = {}
-      temp.rows.each do |x|
-        result.store(x['name'], x)
-      end
-      result
+               {
+                   # the entries in these arrays translate into nodes in the
+                   # json data structure; they restrict the data returned by the server
+                   # and improve performance
+                   name:               [ 'name'],
+                   cpu_total:          [ 'cpu', 'total' ],
+                   guest_cpu_total:    [ 'virtualization', 'kvm', 'guest_cpu_total'],
+                   memory:             [ 'memory', 'total' ],
+                   guest_maxmem_total: [ 'virtualization', 'kvm', 'guest_maxmemory_total'],
+                   platform:           [ 'platform' ],
+                   platform_version:   [ 'platform_version' ],
+                   guests:             [ 'virtualization', 'kvm', 'guests' ],
+                   use:                [ 'system_attrs', 'host_use' ]
+               },
+               # the solr search criteria
+               'virtualization_system:kvm AND virtualization_role:host',
+               start: 0)
+      temp.rows
     end
 
     def load_kvmhosts
-      @kvmhosts = _load_kvmhosts
+      @kvmhosts = {}
+      data = _load_kvm_data
+      data.each do |x|
+        @kvmhosts.store x['name'], VmList::KvmHost.new(x)
+      end
     end
 
     def load_kvmguests
       load_kvmhosts if @kvmhosts.nil? || @kvmhosts.empty?
       @kvmguests = {}
       @kvmhosts.each do |k,v|
-        @kvmguests.store(k,  v['guests'])
+        @kvmguests.store(k,  v.guests)
       end
       @kvmguests
     end
 
     def load_infrahosts
-      temp = @cnxn.partial_search.query(:node, {fqdn: ['name'] }, 'roles:infra', start: 1)
-      @infrahosts = temp.rows
+      @infrahosts = {}
+      data = _load_infrahosts
+      data.each do |x|
+        @infrahosts.store x['fqdn'], x
+      end
+    end
+
+    def _load_infrahosts
+      temp = @cnxn.partial_search.query(:node, {fqdn: ['name'] }, 'roles:infra', start: 0)
+      temp.rows
     end
 
     def get_clients
@@ -101,15 +117,15 @@ module VmList
       @infrahosts = hosts
     end
 
-    def massage_cpu_data
+    def filter_stopped_guests
       @kvmguests.each do |k,v|
         v.each do |y,z|
           if z['state'] == "shut" then
             shutcpu = z['CPU(s)'].to_i
             shutmem = z['Max memory'].to_i / 1048576
 
-            @kvmhosts[k]['cpu'][1] = @kvmhosts[k]['cpu'][1] - shutcpu unless @kvmhosts[k]['cpu'][1] == 0
-            @kvmhosts[k]['memory'][1] = @kvmhosts[k]['memory'][1] - shutmem unless @kvmhosts[k]['memory'] == 0
+            @kvmhosts[k].guest_cpu_total = @kvmhosts[k].guest_cpu_total - shutcpu unless @kvmhosts[k].guest_cpu_total == 0
+            @kvmhosts[k].guest_maxmem_total = @kvmhosts[k].guest_maxmem_total - shutmem unless @kvmhosts[k].guest_maxmem_total == 0
           end
         end
       end
@@ -121,5 +137,14 @@ module VmList
       end
     end
 
+    def finalize
+      @kvmhosts.each do |k, v|
+        v.finalize
+      end
+    end
+
+    def get_binding
+      binding
+    end
   end
 end

@@ -57,103 +57,19 @@
   </tr>
   </thead>
   <tbody>
-  <% @hosts.sort{|a,b| a[0].split(pattern='.').reverse.join(sep='.') <=> b[0].split(pattern='.').reverse.join(sep='.')}.each do |k,v| %>
+  <% @kvmhosts.sort{|a,b| a[0].split(pattern='.').reverse.join(sep='.') <=> b[0].split(pattern='.').reverse.join(sep='.')}.each do |k,v| %>
       <tr> <td align="center"><a name='<%= k %>-top'><a href='#<%= k %>'><%= k %></a></a></td>
-        <!--
-          <%=
-        dc=/sad|som|phl/i.match(k).to_s
-        color = case dc
-                  when "sad" then "DEBABA"
-                  when "som" then "75EFA5"
-                  when "phl" then "3374AA"
-                  else "666633"
-                end
-        "<td bgcolor=#" + color + ">" + dc
-      %>
-	  </td>
-          -->
-        <%=
-          if ( v['os'][0] == "centos" && v['os'][1] == "6.6" )
-            os_color = "50FF50"
-          elsif ( v['os'][0] == "centos" && v['os'][1] == "6.5" )
-            os_color = "FFFF40"
-          elsif ( v['os'][0] == "centos" && v['os'][1] == "6.4" )
-            os_color = "FFEE40"
-          elsif ( v['os'][0] == "centos" && v['os'][1] == "7.1.1503" )
-            os_color = "00FF00"
-          else
-            os_color = "FF4040"
-          end
-          "<td align=center bgcolor=" + os_color + ">" + v['os'][0] + " " + v['os'][1]
-        %>
-        </td>
-        <%=
-          use_color = case v['use']
-                        when "broken" then "FF4040"
-                        when "corp" then "D2B48C"
-                        when "ghetto" then "COCO60"
-                        when "infrastructure" then "FF8020"
-                        when "lab" then "8080FF"
-                        when "production" then "40FF40"
-                        when "preprod" then "FFFFFF"
-                        when "special" then "FFFF40"
-                        when "database" then "CCAA10"
-                        else "C0C0C0"
-                      end
-          "<td align=center bgcolor=" + use_color + ">" + v['use']
-        %>
-        </td>
-        <%
-          cpuuse = v['cpu'][1]
-          cpumax = v['cpu'][0]
-          cpupct = (cpuuse).percent_of(cpumax).round(2)
-          if cpupct < 100
-            cpushade = "%02x" % ((100 - (cpupct))*2.55)
-            cpucolor = cpushade + "FF" + cpushade
-          elsif cpupct < 130
-            cpucolor = "00FF00"
-          elsif cpupct < 258
-            cpuover = cpupct - 130
-            cpured = "%02x" % (2 * cpuover)
-            cpugreen = "%02x" % (255 - (2 * cpuover))
-            cpublue = "%02x" % ((0.5 * cpuover).round)
-            cpucolor = cpured + cpugreen + cpublue
-          else
-            cpucolor = "FF0000"
-          end
-        %>
-        <td align="center" bgcolor=#<%= cpucolor %>>
-          <%= cpupct %>%
-          (<%= cpuuse %> Used / <%= cpumax %> Total)
-
-        </td>
-        <%
-          memuse = v['memory'][1]
-          memmax = v['memory'][0]
-          mempct = (memuse).percent_of(memmax).round(2)
-          if mempct < 100
-            memshade = "%02x" % ((100 - (mempct))*2.55)
-            memcolor = memshade + "FF" + memshade
-          elsif mempct < 228
-            memover = mempct - 100
-            memred = "%02x" % (2 * memover)
-            memgreen = "%02x" % (255 - (2 * memover))
-            memblue = "%02x" % ((0.5 * memover).round)
-            memcolor = memred + memgreen + memblue
-          else
-            memcolor = "FF0000"
-          end
-        %>
-        <td align="center" bgcolor=#<%= memcolor %>>
-          <%= mempct %>%
-          (<%= memuse %>GB Used / <%= memmax %>GB Total)
-        </td> </tr>
+        <td align=center bgcolor=#<%= v.platform_color %> >  <%= v.platform + " " + v.platform_version %></td>
+        <td align=center bgcolor=#<%= v.use_color %>><%= v.use %></td>
+        <td align=center bgcolor=#<%= v.cpu_color %>><%= v.cpu_percentage %>% (<%= v.guest_cpu_total %> Used / <%= v.cpu_total %> Total)</td>
+        <td align=center bgcolor=#<%= v.mem_color %>><%= v.mem_percentage %>% (<%= v.guest_maxmem_total %>GB Used / <%= v.memory %>GB Total)</td>
+      </tr>
   <% end %>
   </tbody>
 </table>
 <!-- End of Resorces by KVM table -->
 <!-- Iterate Guests Lists by KVM Host -->
-<% @guests.sort.each do |k,v| %>
+<% @kvmguests.sort.each do |k,v| %>
     <table border="1">
       <thead>
       <a name=<%= k %>>

@@ -8,7 +8,9 @@ require 'json'
 
 
 svrs = Vmlist::ServerMgr.new
-svrs.load_config
+svrs.load_config('conf/config.json')
+outdir = svrs.get_config.first[1]['outputdir']
+
 svrs.init_servers
 svrs.poll_servers
 # just getting the first server for now; breaks if more than 1 server in config
@@ -18,7 +20,6 @@ obj = svrs.get_servers.first[1]
 hosttemplate = File.open('lib/mchx/vmlist/index.html.erb').read
 index = ERB.new(hosttemplate)
 
-outdir = svrs.get_config['outputdir']
 # Write index.html
 File.open(outdir + 'index.html', 'w') do |f|
   f.write index.result(obj.get_binding)

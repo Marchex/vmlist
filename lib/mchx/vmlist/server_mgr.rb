@@ -9,8 +9,8 @@ module Vmlist
       @svrs = {}
     end
 
-    def load_config
-      @conf = JSON.parse(IO.read('config.json'))
+    def load_config(file = 'config.json')
+      @conf = JSON.parse(IO.read(file))
     end
 
     def get_config
@@ -30,7 +30,15 @@ module Vmlist
         svr.load_clients
         svr.load_kvmhosts
         svr.load_kvmguests
+        svr.load_infrahosts
+        svr.filter_stopped_guests
+        svr.remove_base_guests
+        svr.finalize
       end
+    end
+
+    def get_servers
+      @svrs
     end
 
     def get_servers_list

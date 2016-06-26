@@ -1,0 +1,1 @@
+*/2 * * * * cd /root/vmlist && bin/make_vmlist.rb

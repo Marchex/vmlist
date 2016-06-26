@@ -7,7 +7,9 @@
 /spec/reports/
 /tmp/
 .idea/
-/config.json
+config.json*
+!conf/config.json.template
 spec/data/
 /index.html
 /hosts_and_guests.json
+*.pem

@@ -71,6 +71,7 @@ module VmList
       load_kvmhosts if @kvmhosts.nil? || @kvmhosts.empty?
       @kvmguests = {}
       @kvmhosts.each do |k,v|
+        next if v.guests.nil?
         @kvmguests.store(k,  v.guests)
       end
       @kvmguests
@@ -119,6 +120,9 @@ module VmList
 
     def filter_stopped_guests
       @kvmguests.each do |k,v|
+        if v.nil?
+          next
+        end
         v.each do |y,z|
           if z['state'] == "shut" then
             shutcpu = z['CPU(s)'].to_i
@@ -133,6 +137,7 @@ module VmList
 
     def remove_base_guests
       @kvmguests.values.each do |guest|
+        next if guest.nil?
         guest.delete_if {|k| k =~ /base|template/}
       end
     end

@@ -1,3 +1,4 @@
+require 'json'
 
 # Monkey patch Numeric class method to return percent
 class Numeric
@@ -5,8 +6,10 @@ class Numeric
     self.to_f / n.to_f * 100.00
   end
 end
+
 module VmList
   class KvmHost
+    attr_accessor :name
     attr_accessor :cpu_total
     attr_accessor :guest_cpu_total
     attr_accessor :cpu_percentage
@@ -26,6 +29,7 @@ module VmList
     def initialize(data)
       # the magic strings in the data structure have to map to what is used in the
       # partial_search in the VmList::Server object.
+      self.name               = data['name']
       self.cpu_total          = data['cpu_total'].to_i || 0
       self.guest_cpu_total    = data['guest_cpu_total'].to_i || 0
       self.memory             = data['memory'].to_i/1048576
@@ -35,6 +39,12 @@ module VmList
       self.use                = data['use'].nil? || data['use'].empty? ? 'unknown' : data['use'].to_s
       self.guests             = data['guests']
 
+    end
+
+    def to_json(*args)
+      result = {}
+      self.instance_variables.map {|i| result[i.to_s.gsub(/\@/,'')] = instance_variable_get(i)  }
+      result.to_json(*args)
     end
 
     def finalize

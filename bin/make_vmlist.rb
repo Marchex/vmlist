@@ -27,6 +27,8 @@ end
 
 # Write hosts_and_guests.json
 File.open(outdir + 'hosts_and_guests.json', 'w') do |f|
-  f << obj.get_kvmhosts.to_json
+  foo = { 'data' => [] }
+  obj.get_kvmhosts.map { |k,v| foo['data'].push(v) }
+  f << foo.to_json
 end
 

@@ -4,8 +4,10 @@ module VmList
   class Server
     @conf = {}
 
-    def initialize(config)
+    def initialize(name, config, mgr)
+      @name = name
       @conf = config
+      @mgr  = mgr
       @cnxn = {}
       @clients = []
       @kvmhosts = {}
@@ -63,6 +65,7 @@ module VmList
       @kvmhosts = {}
       data = _load_kvm_data
       data.each do |x|
+        x['chef_server'] = @name
         @kvmhosts.store x['name'], VmList::KvmHost.new(x)
       end
     end
@@ -72,7 +75,12 @@ module VmList
       @kvmguests = {}
       @kvmhosts.each do |k,v|
         next if v.guests.nil?
-        @kvmguests.store(k,  v.guests)
+        v.guests.each do |kk,g|
+          g['kvmhostname'] = k
+          g['index_name'] = g['Name']+'.marchex.com'
+          g['chef_server'] = @mgr.get_client_map[g['index_name']]
+          @kvmguests[g['index_name']] = g
+        end
       end
       @kvmguests
     end
@@ -119,11 +127,9 @@ module VmList
     end
 
     def filter_stopped_guests
-      @kvmguests.each do |k,v|
-        if v.nil?
-          next
-        end
-        v.each do |y,z|
+      @kvmhosts.each do |k,v|
+        next if v.guests.nil?
+        v.guests.each do |y,z|
           if z['state'] == "shut" then
             shutcpu = z['CPU(s)'].to_i
             shutmem = z['Max memory'].to_i / 1048576
@@ -136,9 +142,9 @@ module VmList
     end
 
     def remove_base_guests
-      @kvmguests.values.each do |guest|
-        next if guest.nil?
-        guest.delete_if {|k| k =~ /base|template/}
+      @kvmhosts.each do |h,v|
+        next if v.guests.nil?
+        v.guests.delete_if {|k| k =~ /base|template/}
       end
     end
 

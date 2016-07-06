@@ -13,8 +13,7 @@ outdir = svrs.get_config.first[1]['outputdir']
 
 svrs.init_servers
 svrs.poll_servers
-# just getting the first server for now; breaks if more than 1 server in config
-obj = svrs.get_servers.first[1]
+svrs.finalize_servers
 
 # load erb template
 hosttemplate = File.open('lib/mchx/vmlist/index.html.erb').read
@@ -22,13 +21,20 @@ index = ERB.new(hosttemplate)
 
 # Write index.html
 File.open(outdir + 'index.html', 'w') do |f|
-  f.write index.result(obj.get_binding)
+  f.write index.result(svrs.get_binding)
 end
 
 # Write hosts_and_guests.json
 File.open(outdir + 'hosts_and_guests.json', 'w') do |f|
   foo = { 'data' => [] }
-  obj.get_kvmhosts.map { |k,v| foo['data'].push(v) }
+  svrs.get_kvmhosts.map { |k,v| foo['data'].push(v) }
   f << foo.to_json
 end
 
+File.open(outdir + 'guests.json', 'w') do |f|
+  foo = { 'data' => [] }
+  svrs.get_kvmguests.map { |k,v|
+    foo['data'].push(v)
+  }
+  f << foo.to_json
+end

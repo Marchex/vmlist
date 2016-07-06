@@ -13,3 +13,4 @@ spec/data/
 /index.html
 /hosts_and_guests.json
 *.pem
+guests.json

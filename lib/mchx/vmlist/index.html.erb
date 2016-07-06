@@ -69,7 +69,7 @@
 </table>
 <!-- End of Resorces by KVM table -->
 <!-- Iterate Guests Lists by KVM Host -->
-<% @kvmguests.sort.each do |k,v| %>
+<% @kvmhosts.sort.each do |k,v| next if v.guests.nil? %>
     <table border="1">
       <thead>
       <a name=<%= k %>>
@@ -97,16 +97,22 @@
         %>
         </td>
         <td><%= city %></td>
-        <td><b><%= v.length %></b></td>
+        <td><b><%= v.guests.length %></b></td>
       </tr>
       </tbody>
     </table>
     <table border="1">
       <tr><th>#</th><th>VM name</th><th>State</th><th>CPUs</th><th>RAM</th></tr>
       <% x = 0 %>
-      <% v.keys.each do |y| %>
+      <% v.guests.keys.each do |y| %>
           <% x += 1 %>
-          <tr><td><%= x %>.</td><td> <%= y %></td><td> <%= v[y]['state'] %></td><td> <%= v[y]['CPU(s)'] %></td><td> <%= v[y]['Max memory'] %></td></tr>
+          <tr>
+            <td><%= x %>.</td>
+            <td> <%= y %></td>
+            <td> <%= v.guests[y]['state'] %></td>
+            <td> <%= v.guests[y]['CPU(s)'] %></td>
+            <td> <%= v.guests[y]['Max memory'] %></td>
+          </tr>
       <% end %>
       <!-- <tr><td>VMs:</td><td> <%= x %></td></tr> -->
     </table>

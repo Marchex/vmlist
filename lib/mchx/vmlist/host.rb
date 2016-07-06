@@ -21,9 +21,11 @@ module VmList
     attr_accessor :platform
     attr_accessor :platform_version
     attr_accessor :platform_color
+    attr_accessor :os
     attr_accessor :use
     attr_accessor :use_color
     attr_accessor :guests
+    attr_accessor :chef_server
 
 
     def initialize(data)
@@ -38,25 +40,32 @@ module VmList
       self.platform_version   = data['platform_version'].to_s
       self.use                = data['use'].nil? || data['use'].empty? ? 'unknown' : data['use'].to_s
       self.guests             = data['guests']
+      self.chef_server        = data['chef_server']
 
     end
 
+    # def to_json(*args)
+    #   result = { 'data' => {}, 'children' => [] }
+    #   self.instance_variables.map { |i|
+    #     if i.to_s.match(/guests/)
+    #       guests = instance_variable_get(i)
+    #       next if guests.nil?
+    #       result['children'] = { }
+    #       result['children']= guests.map {|k,v| { 'data' => v }  }
+    #     else
+    #       result['data'][i.to_s.gsub(/\@/,'')] = instance_variable_get(i)
+    #     end
+    #   }
+    #   result.to_json(*args)
+    # end
     def to_json(*args)
-      result = { 'data' => {}, 'children' => [] }
-      self.instance_variables.map { |i|
-        if i.to_s.match(/guests/)
-          guests = instance_variable_get(i)
-          next if guests.nil?
-          result['children'] = { }
-          result['children']= guests.map {|k,v| { 'data' => v }  }
-        else
-          result['data'][i.to_s.gsub(/\@/,'')] = instance_variable_get(i)
-        end
-      }
+      result = {}
+      self.instance_variables.map { |i| result[i.to_s.gsub(/\@/,'')] = instance_variable_get(i) }
       result.to_json(*args)
     end
 
     def finalize
+      self.os                 = self.platform + ' ' + self.platform_version
       self.cpu_percentage     = (self.guest_cpu_total).percent_of(self.cpu_total).round(2)
       self.mem_percentage     = (self.guest_maxmem_total).percent_of(self.memory).round(2)
       calculate_cpu_color

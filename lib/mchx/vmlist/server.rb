@@ -78,7 +78,7 @@ module VmList
         v.guests.each do |kk,g|
           g['kvmhostname'] = k
           g['index_name'] = g['Name']+'.marchex.com'
-          g['chef_server'] = @mgr.get_client_map[g['index_name']]
+          g['chef_server'] = @mgr.get_client_map[g['index_name']] || 'unknown'
           @kvmguests[g['index_name']] = g
         end
       end

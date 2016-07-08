@@ -26,13 +26,17 @@ end
 
 # Write hosts_and_guests.json
 File.open(outdir + 'hosts_and_guests.json', 'w') do |f|
-  foo = { 'data' => [] }
+  foo = { 'data' => [],
+          'timestamp' => Time.now
+  }
   svrs.get_kvmhosts.map { |k,v| foo['data'].push(v) }
   f << foo.to_json
 end
 
 File.open(outdir + 'guests.json', 'w') do |f|
-  foo = { 'data' => [] }
+  foo = { 'data' => [],
+          'timestamp' => Time.now
+  }
   svrs.get_kvmguests.map { |k,v|
     foo['data'].push(v)
   }

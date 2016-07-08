@@ -44,20 +44,6 @@ module VmList
 
     end
 
-    # def to_json(*args)
-    #   result = { 'data' => {}, 'children' => [] }
-    #   self.instance_variables.map { |i|
-    #     if i.to_s.match(/guests/)
-    #       guests = instance_variable_get(i)
-    #       next if guests.nil?
-    #       result['children'] = { }
-    #       result['children']= guests.map {|k,v| { 'data' => v }  }
-    #     else
-    #       result['data'][i.to_s.gsub(/\@/,'')] = instance_variable_get(i)
-    #     end
-    #   }
-    #   result.to_json(*args)
-    # end
     def to_json(*args)
       result = {}
       self.instance_variables.map { |i| result[i.to_s.gsub(/\@/,'')] = instance_variable_get(i) }

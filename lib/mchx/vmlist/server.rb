@@ -53,7 +53,8 @@ module VmList
                    platform:           [ 'platform' ],
                    platform_version:   [ 'platform_version' ],
                    guests:             [ 'virtualization', 'kvm', 'guests' ],
-                   use:                [ 'system_attrs', 'host_use' ]
+                   use:                [ 'system_attrs', 'host_use' ],
+                   run_list:           [ 'run_list']
                },
                # the solr search criteria
                'virtualization_system:kvm AND virtualization_role:host',
@@ -75,7 +76,8 @@ module VmList
                                             platform:           [ 'platform' ],
                                             platform_version:   [ 'platform_version' ],
                                             guests:             [ 'virtualization', 'xen', 'guests' ],
-                                            use:                [ 'system_attrs', 'host_use' ]
+                                            use:                [ 'system_attrs', 'host_use' ],
+                                            run_list:           [ 'run_list']
                                         },
                                         # the solr search criteria
                                         'virtualization_systems_xen:host',

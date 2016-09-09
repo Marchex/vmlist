@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require_relative "../lib/mchx/vmlist/server_mgr"
+require 'bundler/setup'
+require_relative '../lib/mchx/vmlist/server_mgr'
 require 'erb'
 require 'json'
 

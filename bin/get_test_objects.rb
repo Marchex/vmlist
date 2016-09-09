@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require "../lib/mchx/vmlist/server"
+require 'bundler/setup'
+require '../lib/mchx/vmlist/server'
 
 
 def writeout(filename, object)
@@ -10,22 +10,16 @@ def writeout(filename, object)
   output.close
 end
 
+
+svrs = Vmlist::ServerMgr.new
+svrs.load_config('conf/config.json')
+outdir = svrs.get_config.first[1]['outputdir']
+
+svrs.init_servers
+svrs.poll_servers
+svrs.finalize_servers
+
 prefix = '../spec/data/'
-
-obj = VmList::Server.new({'endpoint' =>  'https://api.opscode.com/organizations/marchex',
-                          'client' => 'jciimarchex',
-                          'key' => '/Users/jcarter/.chef/jciimarchex.pem'})
-
-obj.connect
-
-obj.load_clients
-writeout prefix + "test_clients.dumped", Marshal.dump(obj.get_clients)
-
-
+writeout prefix + 'test_clients.dumped', Marshal.dump(obj.get_clients)
 writeout prefix + 'test_kvmhosts.dumped', Marshal.dump(obj._load_kvm_data)
-
-#obj.load_kvmguests
-#obj.get_kvmguests
-
-obj.load_infrahosts
 writeout prefix + 'infrahosts.dumped', Marshal.dump(obj.get_infrahosts)

@@ -61,10 +61,38 @@ module VmList
       temp.rows
     end
 
+    def _load_xen_data
+      temp = @cnxn.partial_search.query(:node,
+                                        {
+                                            # the entries in these arrays translate into nodes in the
+                                            # json data structure; they restrict the data returned by the server
+                                            # and improve performance
+                                            name:               [ 'name'],
+                                            cpu_total:          [ 'cpu', 'total' ],
+                                            guest_cpu_total:    [ 'virtualization', 'xen', 'guest_cpu_total'],
+                                            memory:             [ 'memory', 'total' ],
+                                            guest_maxmem_total: [ 'virtualization', 'xen', 'guest_maxmemory_total'],
+                                            platform:           [ 'platform' ],
+                                            platform_version:   [ 'platform_version' ],
+                                            guests:             [ 'virtualization', 'xen', 'guests' ],
+                                            use:                [ 'system_attrs', 'host_use' ]
+                                        },
+                                        # the solr search criteria
+                                        'virtualization_systems_xen:host',
+                                        start: 0)
+      temp.rows
+    end
+
     def load_kvmhosts
       @kvmhosts = {}
       data = _load_kvm_data
+      xendata = _load_xen_data
       data.each do |x|
+        x['chef_server'] = @name
+        @kvmhosts.store x['name'], VmList::KvmHost.new(x)
+      end
+
+      xendata.each do |x|
         x['chef_server'] = @name
         @kvmhosts.store x['name'], VmList::KvmHost.new(x)
       end
@@ -76,8 +104,10 @@ module VmList
       @kvmhosts.each do |k,v|
         next if v.guests.nil?
         v.guests.each do |kk,g|
+          next if g.nil?
           g['kvmhostname'] = k
-          g['index_name'] = g['Name']+'.marchex.com'
+          # guests always have qualified DNs it seems
+          g['index_name'] = kk + '.marchex.com'
           g['chef_server'] = @mgr.get_client_map[g['index_name']] || 'unknown'
           @kvmguests[g['index_name']] = g
         end

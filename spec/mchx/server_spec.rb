@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative "../../lib/mchx/vmlist/server"
+require_relative '../../lib/vmlist/server'
 
 
 describe 'Vmlist::Server' do

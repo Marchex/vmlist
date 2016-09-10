@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
-require '../lib/mchx/vmlist/server'
+require '../lib/vmlist/server'
 
 
 def writeout(filename, object)

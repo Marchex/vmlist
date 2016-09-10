@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative "../../lib/mchx/vmlist/server"
+require_relative "../../lib/vmlist/server"
 
 describe 'Vmlist::ServerMgr' do
 
@@ -20,7 +20,7 @@ describe 'Vmlist::ServerMgr' do
     @server.load_kvmguests
     @server.load_clients
     @server.load_infrahosts
-    hosttemplate = File.open('lib/mchx/vmlist/index.html.erb').read
+    hosttemplate = File.open('lib/vmlist/index.html.erb').read
     index = ERB.new(hosttemplate)
     # act
     result = index.result(@server.get_binding)

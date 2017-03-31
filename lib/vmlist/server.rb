@@ -53,7 +53,8 @@ module VmList
                    platform:           [ 'platform' ],
                    platform_version:   [ 'platform_version' ],
                    guests:             [ 'virtualization', 'kvm', 'guests' ],
-                   use:                [ 'system_attrs', 'host_use' ]
+                   use:                [ 'system_attrs', 'host_use' ],
+                   run_list:           [ 'run_list']
                },
                # the solr search criteria
                'virtualization_system:kvm AND virtualization_role:host',
@@ -75,7 +76,8 @@ module VmList
                                             platform:           [ 'platform' ],
                                             platform_version:   [ 'platform_version' ],
                                             guests:             [ 'virtualization', 'xen', 'guests' ],
-                                            use:                [ 'system_attrs', 'host_use' ]
+                                            use:                [ 'system_attrs', 'host_use' ],
+                                            run_list:           [ 'run_list']
                                         },
                                         # the solr search criteria
                                         'virtualization_systems_xen:host',
@@ -107,7 +109,7 @@ module VmList
           next if g.nil?
           g['kvmhostname'] = k
           # guests always have qualified DNs it seems
-          g['index_name'] = kk + '.marchex.com'
+          g['index_name'] = kk + '.REDACTED.com'
           g['chef_server'] = @mgr.get_client_map[g['index_name']] || 'unknown'
           @kvmguests[g['index_name']] = g
         end

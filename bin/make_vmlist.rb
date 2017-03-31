@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require_relative "../lib/mchx/vmlist/server_mgr"
+require 'bundler/setup'
+require_relative '../lib/vmlist/server_mgr'
 require 'erb'
 require 'json'
 
@@ -16,7 +16,7 @@ svrs.poll_servers
 svrs.finalize_servers
 
 # load erb template
-hosttemplate = File.open('lib/mchx/vmlist/index.html.erb').read
+hosttemplate = File.open('lib/vmlist/index.html.erb').read
 index = ERB.new(hosttemplate)
 
 # Write index.html

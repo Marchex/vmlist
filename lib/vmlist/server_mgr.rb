@@ -2,7 +2,7 @@ require 'json'
 require 'pp'
 require_relative 'server'
 
-module Vmlist
+module VmList
   class ServerMgr
     def initialize
       @conf = {}
@@ -39,6 +39,8 @@ module Vmlist
       end
     end
 
+    # maps a client to the chef server it resides on
+    # k=client_name, v=chef_server_name
     def get_client_map
       @client_map
     end

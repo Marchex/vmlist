@@ -1,5 +1,5 @@
 FROM ubuntu:16.04
-MAINTAINER Jimmy Carter <jcarter@marchex.com>
+MAINTAINER Jimmy Carter <jcarter@REDACTED.com>
 RUN apt-get update && \
     apt-get install -y ruby && \
     apt-get install -y ruby-dev && \

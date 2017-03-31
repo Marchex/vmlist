@@ -6,7 +6,7 @@
     "key": "<path to your private key associated with the client above>"
   },
   "server 2": {
-    "endpoint": "https://<chef server API endpoint> e.g. chef.marchex.com/organizations/MY_ORG",
+    "endpoint": "https://<chef server API endpoint> e.g. REDACTED.com/organizations/MY_ORG",
     "client": "<your user/client name, commonly username e.g. tflint>",
     "key": "<path to your private key associated with the client above>"
   }

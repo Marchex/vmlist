@@ -109,7 +109,7 @@ module VmList
           next if g.nil?
           g['kvmhostname'] = k
           # guests always have qualified DNs it seems
-          g['index_name'] = kk + '.marchex.com'
+          g['index_name'] = kk + '.REDACTED.com'
           g['chef_server'] = @mgr.get_client_map[g['index_name']] || 'unknown'
           @kvmguests[g['index_name']] = g
         end

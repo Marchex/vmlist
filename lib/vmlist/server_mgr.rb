@@ -2,7 +2,7 @@ require 'json'
 require 'pp'
 require_relative 'server'
 
-module Vmlist
+module VmList
   class ServerMgr
     def initialize
       @conf = {}

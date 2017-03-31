@@ -22,4 +22,5 @@ svrs.finalize_servers
 prefix = '../spec/data/'
 writeout prefix + 'test_clients.dumped', Marshal.dump(obj.get_clients)
 writeout prefix + 'test_kvmhosts.dumped', Marshal.dump(obj._load_kvm_data)
+writeout prefix + 'test_xenhosts.dumped', Marshal.dump(obj._load_xen_data)
 writeout prefix + 'infrahosts.dumped', Marshal.dump(obj.get_infrahosts)
